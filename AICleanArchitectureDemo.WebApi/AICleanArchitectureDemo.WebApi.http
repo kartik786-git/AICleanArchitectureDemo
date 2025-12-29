@@ -1,0 +1,6 @@
+@AICleanArchitectureDemo.WebApi_HostAddress = http://localhost:5223
+
+GET {{AICleanArchitectureDemo.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
