@@ -1,0 +1,190 @@
+@model AICleanArchitectureDemo.Application.DTOs.OrderDto
+@{
+    ViewData["Title"] = "Order Details";
+    // Determine tracking steps based on status
+    var trackingSteps = new List<(string Step, string Description, bool IsCompleted, bool IsCurrent)>();
+    var isCompleted = Model.Status.ToLower() == "completed" || Model.Status.ToLower() == "delivered";
+    var isProcessing = Model.Status.ToLower() == "processing";
+    var isShipped = Model.Status.ToLower() == "shipped";
+    var isDelivered = Model.Status.ToLower() == "delivered";
+
+    trackingSteps.Add(("Order Placed", "Your order has been received and confirmed", true, !isProcessing && !isShipped && !isDelivered));
+    trackingSteps.Add(("Processing", "Your order is being prepared for shipment", isProcessing || isShipped || isDelivered, isProcessing));
+    trackingSteps.Add(("Shipped", "Your order has been shipped and is on its way", isShipped || isDelivered, isShipped));
+    trackingSteps.Add(("Delivered", "Your order has been delivered successfully", isDelivered, isDelivered));
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-receipt me-3"></i>Order #@Model.Id
+            </h1>
+            <p class="lead text-muted">Order details and tracking information</p>
+        </div>
+    </div>
+
+    <!-- Order Tracking -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-route me-2"></i>Order Tracking
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @for (int i = 0; i < trackingSteps.Count; i++)
+                        {
+                            var step = trackingSteps[i];
+                            var stepClass = step.IsCompleted ? "completed" : step.IsCurrent ? "current" : "pending";
+                            <div class="col-md-3 mb-3">
+                                <div class="tracking-step @stepClass position-relative">
+                                    <div class="d-flex align-items-center">
+                                        <div class="tracking-icon @stepClass me-3">
+                                            @if (step.IsCompleted)
+                                            {
+                                                <i class="fas fa-check"></i>
+                                            }
+                                            else if (step.IsCurrent)
+                                            {
+                                                <i class="fas fa-clock"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-circle"></i>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-bold">@step.Step</h6>
+                                            <small class="text-muted">@step.Description</small>
+                                        </div>
+                                    </div>
+                                    @if (i < trackingSteps.Count - 1)
+                                    {
+                                        <div class="position-absolute top-50 end-0 translate-middle-y" style="width: 20px; height: 2px; background-color: var(--secondary-color); margin-right: -10px;"></div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Order Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <small class="text-muted">Order Date</small>
+                                <div class="fw-bold fs-5">@Model.OrderDate.ToString("MMMM dd, yyyy")</div>
+                                <small class="text-muted">@Model.OrderDate.ToString("HH:mm")</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <small class="text-muted">Current Status</small>
+                                <div class="fw-bold fs-5">
+                                    <span class="badge bg-success">@Model.Status</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <small class="text-muted">Customer Email</small>
+                                <div class="fw-bold">@Model.CustomerEmail</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <small class="text-muted">Total Amount</small>
+                                <div class="fw-bold text-success fs-4">$@Model.TotalAmount</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>Shipping Address
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">John Doe</p>
+                    <p class="mb-1">123 Main Street</p>
+                    <p class="mb-1">New York, NY 10001</p>
+                    <p class="mb-0">United States</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>Order Items
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="border-bottom p-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <div class="bg-light rounded p-3">
+                                        <i class="fas fa-box fa-2x text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold mb-1">@item.ProductName</h6>
+                                    <small class="text-muted">Unit Price: $@item.PriceAtTime</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span class="badge bg-secondary fs-6">Qty: @item.Quantity</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <span class="fw-bold text-primary">$@item.TotalPrice</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-star"></i> Review
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+            </a>
+            <button class="btn btn-primary">
+                <i class="fas fa-print me-2"></i>Print Order
+            </button>
+        </div>
+    </div>
+</div>

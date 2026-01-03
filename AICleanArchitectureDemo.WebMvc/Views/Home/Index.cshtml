@@ -1,0 +1,81 @@
+﻿@model AICleanArchitectureDemo.WebMvc.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<section class="hero-section text-center">
+    <div class="container">
+        <h1>Welcome to ModernShop</h1>
+        <p class="lead">Discover amazing products at great prices. Quality shopping made simple.</p>
+        <a href="@Url.Action("Index", "Products")" class="btn btn-light btn-lg mt-3">
+            <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+        </a>
+    </div>
+</section>
+
+<div class="container">
+    <section class="mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="display-5 fw-bold text-primary">Shop by Category</h2>
+                <p class="text-muted">Explore our curated collections</p>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="category-card h-100">
+                        <div class="mb-3">
+                            <i class="fas fa-tag fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">@category.Name</h5>
+                        <p class="card-text">@category.Description</p>
+                        <a href="@Url.Action("Index", "Products", new { categoryId = category.Id })" class="btn btn-primary mt-3">
+                            <i class="fas fa-arrow-right me-2"></i>Browse Products
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="display-5 fw-bold text-primary">Featured Products</h2>
+                <p class="text-muted">Handpicked items just for you</p>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="product-card h-100">
+                        <div class="product-image">
+                            <i class="fas fa-image fa-3x"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text text-muted flex-grow-1">@product.Description</p>
+                            <div class="mt-auto">
+                                <p class="product-price mb-3">$@product.Price</p>
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("Details", "Products", new { id = product.Id })" class="btn btn-outline-primary flex-fill">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                    <form method="post" action="@Url.Action("AddToCart", "Products")" class="flex-fill">
+                                        <input type="hidden" name="productId" value="@product.Id" />
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-cart-plus me-1"></i>Add
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>

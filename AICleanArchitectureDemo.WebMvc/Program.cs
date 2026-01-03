@@ -3,19 +3,26 @@ using AICleanArchitectureDemo.Domain.Entities;
 using AICleanArchitectureDemo.Domain.Interfaces;
 using AICleanArchitectureDemo.Infrastructure;
 using AICleanArchitectureDemo.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddControllersWithViews();
+builder.Services.AddSession();
 
 // Register layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+// Apply database migrations
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+}
 
 // Seed data
 using (var scope = app.Services.CreateScope())
@@ -31,9 +38,9 @@ using (var scope = app.Services.CreateScope())
         var clothing = new Category { Name = "Clothing", Description = "Fashion and apparel" };
         var books = new Category { Name = "Books", Description = "Books and publications" };
 
-        await categoryRepo.AddAsync(electronics);
-        await categoryRepo.AddAsync(clothing);
-        await categoryRepo.AddAsync(books);
+        categoryRepo.AddAsync(electronics).Wait();
+        categoryRepo.AddAsync(clothing).Wait();
+        categoryRepo.AddAsync(books).Wait();
 
         // Seed products
         var products = new List<Product>
@@ -46,19 +53,31 @@ using (var scope = app.Services.CreateScope())
 
         foreach (var product in products)
         {
-            await productRepo.AddAsync(product);
+            productRepo.AddAsync(product).Wait();
         }
     }
 }
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-//}
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
-app.MapControllers();
+app.UseRouting();
+
+app.UseSession();
+app.UseAuthorization();
+
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
 
 app.Run();

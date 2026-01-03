@@ -1,0 +1,28 @@
+@model AICleanArchitectureDemo.Application.DTOs.ProductDto
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<h1>@Model.Name</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@Model.Name</h5>
+                <p class="card-text">@Model.Description</p>
+                <p class="card-text"><strong>Price: $@Model.Price</strong></p>
+                <p class="card-text">Stock: @Model.StockQuantity</p>
+                <p class="card-text">Category: @Model.CategoryName</p>
+                <form method="post" action="@Url.Action("AddToCart", "Products")">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="@Url.Action("Index", "Products")" class="btn btn-secondary">Back to Products</a>
+</div>
