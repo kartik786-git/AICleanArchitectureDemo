@@ -116,6 +116,23 @@ AICleanArchitectureDemo/
     │       └── Details.cshtml
     ├── Program.cs
     └── appsettings.json
+
+└── AICleanArchitectureDemo.WebBlazor/        # Blazor Server Application
+    ├── Pages/
+    │   ├── Index.razor                        # Home page with navigation
+    │   ├── Products.razor                     # Product browsing and cart
+    │   ├── Cart.razor                         # Shopping cart management
+    │   ├── Orders.razor                       # Order history and tracking
+    │   └── _Host.cshtml                       # Host page configuration
+    ├── Services/
+    │   └── CartStateService.cs                # Cart state management
+    ├── Shared/
+    │   └── MainLayout.razor                   # Main layout with navigation
+    ├── wwwroot/
+    │   ├── css/site.css                       # Custom styles
+    │   └── favicon.png
+    ├── Program.cs
+    └── appsettings.json
 ```
 
 ## ✨ Features
@@ -275,6 +292,138 @@ The modern MVC web application provides an attractive, user-friendly interface f
    - Products: `http://localhost:5181/Products`
    - Cart: `http://localhost:5181/Cart`
    - Orders: `http://localhost:5181/Orders`
+
+## ⚛️ Blazor Server Application
+
+The modern Blazor Server web application provides an interactive, real-time shopping experience with server-side rendering and SignalR connectivity.
+
+### Features
+
+#### 🏠 Home Page
+- **Welcome Dashboard**: Clean navigation cards with call-to-action
+- **Quick Access**: Direct links to Products, Cart, and Orders
+- **Modern UI**: Bootstrap 5 with custom styling and Font Awesome icons
+- **Responsive Design**: Optimized for all device sizes
+
+#### 📦 Products Page
+- **Product Catalog**: Interactive grid view with product cards
+- **Category Filtering**: Dynamic filter buttons with real-time updates
+- **Add to Cart**: One-click cart addition with immediate feedback
+- **Session Management**: Persistent cart state across page navigation
+
+#### 🛒 Shopping Cart
+- **Real-time Updates**: Cart contents update instantly
+- **Quantity Management**: Increase/decrease item quantities
+- **Price Calculations**: Automatic subtotal and total calculations
+- **Checkout Process**: Seamless order placement with email capture
+- **Item Removal**: Remove individual items from cart
+
+#### 📋 Order Management
+- **Order History**: Complete list of all orders
+- **Order Details**: Detailed view of order items and information
+- **Status Tracking**: Visual order status indicators
+- **Navigation**: Easy back-and-forth between order list and details
+
+### Technical Highlights
+
+#### 🔄 Interactive Server Mode
+- **SignalR Integration**: Real-time communication between client and server
+- **Server-Side Rendering**: Initial page loads with full HTML
+- **Interactive Components**: Dynamic updates without full page refreshes
+- **Session Persistence**: Cart state maintained across SignalR connections
+
+#### 🏗️ Architecture Integration
+- **Clean Architecture**: Uses same Domain, Application, and Infrastructure layers
+- **MediatR CQRS**: Same command/query pattern as MVC and API
+- **Dependency Injection**: Full integration with existing DI container
+- **Database Sharing**: Same SQL Server database as other applications
+
+#### 📊 Session Management
+- **HttpContext Access**: Session management during initial prerender phase
+- **SignalR Compatibility**: Cart state persistence across server interactions
+- **Fallback Logic**: Robust session handling for edge cases
+- **State Synchronization**: Real-time cart updates across components
+
+### UI/UX Highlights
+
+- **Interactive Design**: Hover effects, smooth transitions, modern cards
+- **Real-time Feedback**: Loading states, success indicators, error handling
+- **Responsive Layout**: Bootstrap 5 grid system with custom breakpoints
+- **Icon Integration**: Font Awesome icons throughout the interface
+- **Color Scheme**: Professional blue primary with semantic color usage
+- **Accessibility**: Proper ARIA labels and keyboard navigation support
+
+### Accessing the Blazor Server Application
+
+1. **Run the Blazor Application**
+   ```bash
+   dotnet run --project AICleanArchitectureDemo.WebBlazor
+   ```
+
+2. **Access URLs**
+   - Blazor Application: `http://localhost:5031` (or next available port)
+   - Home Page: `http://localhost:5031/`
+   - Products: `http://localhost:5031/products`
+   - Cart: `http://localhost:5031/cart`
+   - Orders: `http://localhost:5031/orders`
+   - Order Details: `http://localhost:5031/orders/{id}`
+
+### Key Differences from MVC Application
+
+#### ⚡ Performance & Interactivity
+- **Real-time Updates**: Cart changes reflect immediately without page refresh
+- **SignalR Connection**: Persistent connection enables instant UI updates
+- **Component-Based**: Razor components with encapsulated logic
+- **Client-Server Sync**: Automatic state synchronization
+
+#### 🔧 Technical Architecture
+- **Server-Side Rendering**: Initial HTML generation on server
+- **Interactive Mode**: Subsequent interactions via SignalR
+- **Scoped Services**: Per-user service instances with state management
+- **Circuit Management**: Connection lifecycle handling
+
+#### 🎨 User Experience
+- **Instant Feedback**: Button clicks provide immediate visual response
+- **Seamless Navigation**: Page transitions without full reloads
+- **Live Updates**: Cart counters and totals update in real-time
+- **Error Resilience**: Graceful error handling with user feedback
+
+### Session Handling in Blazor Server
+
+Blazor Server has unique session management requirements:
+
+```csharp
+// During prerender (HttpContext available)
+protected override async Task OnInitializedAsync()
+{
+    var sessionId = GetOrCreateSessionId(); // HttpContext.Session available
+    CartState.SetSessionId(sessionId);
+    await LoadData();
+}
+
+// During interactive operations (HttpContext null)
+private async Task AddToCart(int productId)
+{
+    var sessionId = CartState.SessionId ?? GetOrCreateSessionId();
+    // Proceed with cart operation
+}
+```
+
+### Business Logic Integration
+
+The Blazor application integrates with the same business logic as MVC:
+
+- **Same CQRS Commands**: `AddToCartCommand`, `CreateOrderCommand`
+- **Same Validation**: FluentValidation rules applied
+- **Same Business Rules**: Stock validation, price calculations
+- **Same Data Access**: EF Core repositories and transactions
+
+### Development Advantages
+
+- **Code Sharing**: Reuses 100% of Domain, Application, and Infrastructure layers
+- **Consistent API**: Same endpoints and data contracts
+- **Unified Business Logic**: Single source of truth for all applications
+- **Testing Compatibility**: Same unit tests work across all presentation layers
 
 ## 🔄 End-to-End Application Flow
 
