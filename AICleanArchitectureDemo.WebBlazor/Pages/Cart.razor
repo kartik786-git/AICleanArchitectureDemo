@@ -1,0 +1,250 @@
+@page "/cart"
+@inject MediatR.IMediator Mediator
+@inject AICleanArchitectureDemo.WebBlazor.Services.CartStateService CartState
+@inject NavigationManager Navigation
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@implements IDisposable
+
+<PageTitle>Shopping Cart - Online Shopping</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="display-4 fw-bold text-success">
+                <i class="fas fa-shopping-cart me-3"></i>Shopping Cart
+            </h1>
+            <p class="lead text-muted">Review your items and complete your purchase</p>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!CartState.CartItems.Any())
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="card shadow-sm">
+                    <div class="card-body py-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                        <h3 class="text-muted">Your cart is empty</h3>
+                        <p class="text-muted">Add some products to get started!</p>
+                        <button class="btn btn-primary" @onclick="NavigateToProducts">
+                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Cart Items (@CartState.GetTotalItems() items)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in CartState.CartItems)
+                        {
+                            <div class="row mb-3 pb-3 border-bottom">
+                                <div class="col-md-2">
+                                    <div class="cart-item-image">
+                                        <i class="fas fa-image fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">@item.ProductName</h6>
+                                    <small class="text-muted">Product ID: @item.ProductId</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="fw-bold">$@item.ProductPrice</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary"
+                                                @onclick="() => UpdateQuantity(item.ProductId, item.Quantity - 1)">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="form-control text-center"
+                                               @bind="item.Quantity" @bind:after="() => UpdateQuantity(item.ProductId, item.Quantity)" />
+                                        <button class="btn btn-outline-secondary"
+                                                @onclick="() => UpdateQuantity(item.ProductId, item.Quantity + 1)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <span class="fw-bold">$@(item.ProductPrice * item.Quantity)</span>
+                                    <br />
+                                    <button class="btn btn-sm btn-outline-danger mt-1"
+                                            @onclick="() => RemoveItem(item.ProductId)">
+                                        <i class="fas fa-trash me-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calculator me-2"></i>Order Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal (@CartState.GetTotalItems() items)</span>
+                            <span>$@CartState.GetTotalPrice()</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span>$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax</span>
+                            <span>$0.00</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total</strong>
+                            <strong>$@CartState.GetTotalPrice()</strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="customerEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="customerEmail"
+                                   @bind="customerEmail" placeholder="Enter your email" />
+                        </div>
+
+                        <button class="btn btn-success w-100 mb-2" @onclick="ProceedToCheckout" disabled="@string.IsNullOrEmpty(customerEmail)">
+                            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                        </button>
+                        <button class="btn btn-outline-primary w-100" @onclick="NavigateToProducts">
+                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private string customerEmail = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartState.OnCartChanged += StateHasChanged;
+        // Ensure session is initialized during prerender
+        var sessionId = HttpContextAccessor.HttpContext?.Session.GetString("SessionId");
+        if (!string.IsNullOrEmpty(sessionId))
+        {
+            CartState.SetSessionId(sessionId);
+        }
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        var sessionId = HttpContextAccessor.HttpContext?.Session.GetString("SessionId");
+        if (!string.IsNullOrEmpty(sessionId))
+        {
+            CartState.SetSessionId(sessionId);
+            var cartItems = await Mediator.Send(new AICleanArchitectureDemo.Application.Features.Cart.Queries.GetCartQuery(sessionId));
+            CartState.UpdateCart(cartItems);
+        }
+        isLoading = false;
+    }
+
+    private async Task UpdateQuantity(int productId, int newQuantity)
+    {
+        if (newQuantity <= 0)
+        {
+            await RemoveItem(productId);
+            return;
+        }
+
+        try
+        {
+            // Use session ID from CartState (set during prerender)
+            var sessionId = CartState.SessionId ?? HttpContextAccessor.HttpContext?.Session.GetString("SessionId");
+            if (string.IsNullOrEmpty(sessionId)) return;
+
+            var command = new AICleanArchitectureDemo.Application.Features.Cart.Commands.AddToCartCommand(sessionId, productId, newQuantity);
+            await Mediator.Send(command);
+
+            await LoadCart();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating quantity: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveItem(int productId)
+    {
+        try
+        {
+            // Use session ID from CartState (set during prerender)
+            var sessionId = CartState.SessionId ?? HttpContextAccessor.HttpContext?.Session.GetString("SessionId");
+            if (string.IsNullOrEmpty(sessionId)) return;
+
+            var command = new AICleanArchitectureDemo.Application.Features.Cart.Commands.AddToCartCommand(sessionId, productId, 0);
+            await Mediator.Send(command);
+
+            await LoadCart();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error removing item: {ex.Message}");
+        }
+    }
+
+    private async Task ProceedToCheckout()
+    {
+        var sessionId = CartState.SessionId ?? HttpContextAccessor.HttpContext?.Session.GetString("SessionId");
+        if (string.IsNullOrEmpty(customerEmail) || string.IsNullOrEmpty(sessionId))
+            return;
+
+        try
+        {
+            var command = new AICleanArchitectureDemo.Application.Features.Orders.Commands.CreateOrderCommand(sessionId, customerEmail);
+            var orderId = await Mediator.Send(command);
+
+            // Clear cart after successful order
+            CartState.ClearCart();
+
+            // Navigate to order confirmation
+            Navigation.NavigateTo($"/orders/{orderId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating order: {ex.Message}");
+        }
+    }
+
+    private void NavigateToProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    public void Dispose()
+    {
+        CartState.OnCartChanged -= StateHasChanged;
+    }
+}

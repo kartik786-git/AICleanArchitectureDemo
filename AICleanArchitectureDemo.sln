@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AICleanArchitectureDemo.Web
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AICleanArchitectureDemo.WebMvc", "AICleanArchitectureDemo.WebMvc\AICleanArchitectureDemo.WebMvc.csproj", "{6A309585-D650-4B00-AAF3-1B0F264113C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AICleanArchitectureDemo.WebBlazor", "AICleanArchitectureDemo.WebBlazor\AICleanArchitectureDemo.WebBlazor.csproj", "{7B419686-E750-4C00-BBF4-2C0F365239D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{6A309585-D650-4B00-AAF3-1B0F264113C9}.Release|x64.Build.0 = Release|Any CPU
 		{6A309585-D650-4B00-AAF3-1B0F264113C9}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A309585-D650-4B00-AAF3-1B0F264113C9}.Release|x86.Build.0 = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|x64.Build.0 = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Debug|x86.Build.0 = Debug|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|x64.ActiveCfg = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|x64.Build.0 = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{7B419686-E750-4C00-BBF4-2C0F365239D9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,217 @@
+@page "/orders"
+@page "/orders/{orderId:int}"
+@inject MediatR.IMediator Mediator
+@inject NavigationManager Navigation
+
+<PageTitle>Order History - Online Shopping</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="display-4 fw-bold text-info">
+                <i class="fas fa-receipt me-3"></i>Order History
+            </h1>
+            <p class="lead text-muted">Track your orders and purchase history</p>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    }
+    else if (selectedOrder != null)
+    {
+        <!-- Order Details View -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <button class="btn btn-outline-secondary" @onclick="BackToOrders">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt me-2"></i>Order #@selectedOrder.Id
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Order Date:</strong> @selectedOrder.OrderDate.ToString("MMM dd, yyyy")
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Status:</strong>
+                                <span class="badge bg-success">@selectedOrder.Status</span>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3">Order Items</h6>
+                        @foreach (var item in selectedOrder.Items)
+                        {
+                            <div class="row mb-3 pb-3 border-bottom">
+                                <div class="col-md-2">
+                                    <div class="cart-item-image">
+                                        <i class="fas fa-image fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">@item.ProductName</h6>
+                                    <small class="text-muted">Product ID: @item.ProductId</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span>Qty: @item.Quantity</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <span class="fw-bold">$@item.TotalPrice</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <h5>Total: <span class="text-success">$@selectedOrder.TotalAmount</span></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shipping-fast me-2"></i>Shipping Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Customer Email:</strong> @selectedOrder.CustomerEmail</p>
+                        <p><strong>Shipping Address:</strong> Same as billing address</p>
+                        <p><strong>Estimated Delivery:</strong> 3-5 business days</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Orders List View -->
+        @if (!orders.Any())
+        {
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="card shadow-sm">
+                        <div class="card-body py-5">
+                            <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                            <h3 class="text-muted">No orders found</h3>
+                            <p class="text-muted">Your order history will appear here once you make a purchase.</p>
+                            <button class="btn btn-primary" @onclick="NavigateToProducts">
+                                <i class="fas fa-arrow-left me-2"></i>Start Shopping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var order in orders)
+                {
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Order #@order.Id</h6>
+                                    <span class="badge bg-success">@order.Status</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">Order Date: @order.OrderDate.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Items: @order.Items.Sum(i => i.Quantity)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Total: $@order.TotalAmount</strong>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm w-100"
+                                        @onclick="() => ViewOrderDetails(order.Id)">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<AICleanArchitectureDemo.Application.DTOs.OrderDto> orders = new();
+    private AICleanArchitectureDemo.Application.DTOs.OrderDto? selectedOrder;
+    private bool isLoading = true;
+    private int? orderId;
+
+    [Parameter]
+    public int? OrderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (OrderId.HasValue)
+        {
+            await LoadOrderDetails(OrderId.Value);
+        }
+        else
+        {
+            await LoadOrders();
+        }
+    }
+
+    private async Task LoadOrders()
+    {
+        isLoading = true;
+
+        // In a real app, you'd filter by user email/session
+        // For now, show all orders
+        orders = await Mediator.Send(new AICleanArchitectureDemo.Application.Features.Orders.Queries.GetOrdersQuery());
+
+        isLoading = false;
+    }
+
+    private async Task LoadOrderDetails(int id)
+    {
+        isLoading = true;
+
+        selectedOrder = await Mediator.Send(new AICleanArchitectureDemo.Application.Features.Orders.Queries.GetOrderByIdQuery(id));
+
+        isLoading = false;
+    }
+
+    private void ViewOrderDetails(int id)
+    {
+        Navigation.NavigateTo($"/orders/{id}");
+    }
+
+    private void BackToOrders()
+    {
+        selectedOrder = null;
+        Navigation.NavigateTo("/orders");
+    }
+
+    private void NavigateToProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}

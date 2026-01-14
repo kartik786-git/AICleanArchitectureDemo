@@ -1,0 +1,80 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+
+<PageTitle>Home - Online Shopping</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-shopping-bag me-3"></i>Welcome to Our Store
+            </h1>
+            <p class="lead text-muted">Discover amazing products at great prices</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-box fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Browse Products</h5>
+                    <p class="card-text">Explore our wide range of products across different categories.</p>
+                    <button class="btn btn-primary" @onclick="NavigateToProducts">
+                        <i class="fas fa-arrow-right me-2"></i>Shop Now
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Shopping Cart</h5>
+                    <p class="card-text">View and manage items in your shopping cart.</p>
+                    <button class="btn btn-success" @onclick="NavigateToCart">
+                        <i class="fas fa-shopping-cart me-2"></i>View Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-receipt fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Order History</h5>
+                    <p class="card-text">Track your orders and view purchase history.</p>
+                    <button class="btn btn-info" @onclick="NavigateToOrders">
+                        <i class="fas fa-history me-2"></i>View Orders
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>Getting Started</h5>
+                <p class="mb-0">Browse our products, add items to your cart, and complete your purchase with ease!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    private void NavigateToCart()
+    {
+        Navigation.NavigateTo("/cart");
+    }
+
+    private void NavigateToOrders()
+    {
+        Navigation.NavigateTo("/orders");
+    }
+}
