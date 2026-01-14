@@ -162,12 +162,21 @@
     private List<AICleanArchitectureDemo.Application.DTOs.OrderDto> orders = new();
     private AICleanArchitectureDemo.Application.DTOs.OrderDto? selectedOrder;
     private bool isLoading = true;
-    private int? orderId;
 
     [Parameter]
     public int? OrderId { get; set; }
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
     {
         if (OrderId.HasValue)
         {
@@ -175,6 +184,7 @@
         }
         else
         {
+            selectedOrder = null;
             await LoadOrders();
         }
     }
