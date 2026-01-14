@@ -11,6 +11,7 @@ A comprehensive .NET 10 e-commerce platform featuring both **modern web UI** and
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Web Application](#web-application)
+- [Blazor Server Application](#blazor-server-application)
 - [API Endpoints](#api-endpoints)
 - [End-to-End Application Flow](#end-to-end-application-flow)
 - [Database Schema](#database-schema)
